@@ -20,17 +20,12 @@ package org.nuxeo.dmk;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.MalformedURLException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
-import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
@@ -172,6 +167,31 @@ public class DmkComponent extends DefaultComponent {
             httpsConnector = newConnector(configs.get("https"));
             log.info("JMX HTTPS connector available at " + httpConnector.getAddress()
                     + " (not active, to be started in JMX console)");
+        }
+    }
+
+    @Override
+    public void applicationStopped(ComponentContext context, Instant instant) {
+        if (htmlAdaptor != null) {
+            try {
+                destroyAdaptor(htmlAdaptor);
+            } finally {
+                htmlAdaptor = null;
+            }
+        }
+        if (httpConnector != null) {
+            try {
+                destroyConnector(httpConnector);
+            } finally {
+                httpConnector = null;
+            }
+        }
+        if (httpsConnector != null) {
+            try {
+                destroyConnector(httpsConnector);
+            } finally {
+                httpsConnector = null;
+            }
         }
     }
 }
